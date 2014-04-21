@@ -10,8 +10,6 @@ import java.io.InputStream;
 
 public class SnailCache<V> {
 
-    private static final int INDEX_VALUE = 0; // allow only one value per entry
-
     private final LruCache<String, V> mMemCache;
     private final SimpleDiskCache mDiskCache;
 
@@ -58,7 +56,12 @@ public class SnailCache<V> {
     public SnailCache(File directory, int appVersion,
                       long maxSizeDisk) throws IOException {
         super();
-        mMemCache = new LruCache<String, V>(2) {
+
+        // 获取应用程序最大可用内存
+        int maxMemory = (int) Runtime.getRuntime().maxMemory();
+        int cacheSize = maxMemory / 4;
+        // 设置图片缓存大小为程序最大可用内存的1/4
+        mMemCache = new LruCache<String, V>(cacheSize) {
 
             @Override
             protected void entryRemoved(boolean evicted, String key,
@@ -84,7 +87,6 @@ public class SnailCache<V> {
      * @return value
      */
     public final V get(String key, CacheType type) {
-        key = FileUtils.getKey(key);
         V value = mMemCache.get(key);
         if (mDiskCache != null && value == null) {
             try {
@@ -113,16 +115,6 @@ public class SnailCache<V> {
                 mMemCache.put(key, value);
             }
         }
-
-
-        switch (type) {
-            case BITMAP:
-                if (value instanceof SimpleDiskCache.InputStreamEntry) {
-                    return (V) BitmapFactory.decodeStream(((SimpleDiskCache.InputStreamEntry) value).getInputStream());
-                }
-                break;
-        }
-
         return value;
     }
 
@@ -133,16 +125,24 @@ public class SnailCache<V> {
      * @param newValue
      * @return oldValue
      */
-    public final V put(String key, V newValue) throws IOException {
-        key = FileUtils.getKey(key);
-        V oldValue = mMemCache.put(key, newValue);
-        if (newValue instanceof InputStream) {
-            mDiskCache.put(key, (InputStream) newValue);
-        } else if (newValue instanceof String) {
-            mDiskCache.put(key, (String) newValue);
-        }
+    public final void put(String key, V newValue, CacheType type) throws IOException {
 
-        return oldValue;
+        switch (type) {
+            case BITMAP:
+                mDiskCache.put(key, (InputStream) newValue);
+                mMemCache.put(key, (V) mDiskCache.getBitmap(key));
+                break;
+            case INPUTSTREAM:
+                mDiskCache.put(key, (InputStream) newValue);
+                mMemCache.put(key, (V) mDiskCache.getInputStream(key));
+                break;
+            case STRING:
+                mDiskCache.put(key, (String) newValue);
+                mMemCache.put(key, (V) mDiskCache.getString(key));
+                break;
+            default:
+                break;
+        }
     }
 
 

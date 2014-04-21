@@ -1,6 +1,9 @@
 package com.snail.cache;
 
 import android.util.Log;
+import android.widget.ImageView;
+import com.snail.util.SimpleDiskCache;
+import com.snail.util.SnailCache;
 
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
@@ -24,6 +27,21 @@ public class ThreadPoolManager {
 
     private Thread poolThread;
     private static final int SLEEP_TIME = 200;
+
+
+    public void loadIcon(final ImageView imageView, final String url, final SnailCache cache) {
+        addAsyncTask(new SnailThreadPoolTask(url, cache, SnailCache.CacheType.BITMAP, new CacheCallBack() {
+            @Override
+            public void onFinish(String key) {
+                imageView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        imageView.setImageBitmap(((SimpleDiskCache.BitmapEntry) cache.get(url, SnailCache.CacheType.BITMAP)).getBitmap());
+                    }
+                });
+            }
+        }));
+    }
 
     public ThreadPoolManager(int type, int poolSize) {
         this.type = (type == TYPE_FIFO) ? TYPE_FIFO : TYPE_LIFO;

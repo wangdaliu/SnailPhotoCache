@@ -1,5 +1,7 @@
 package com.snail.cache;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Process;
 import com.snail.util.FileUtils;
 import com.snail.util.SnailCache;
@@ -11,15 +13,16 @@ public class SnailThreadPoolTask extends ThreadPoolTask {
 
     private static final String TAG = "MyThreadPoolTask";
 
-    private SnailCache mDiskLruCache;
+    private SnailCache mCache;
 
     private CacheCallBack callback;
 
     private SnailCache.CacheType mCacheType;
 
-    public SnailThreadPoolTask(String url, SnailCache mDiskLruCache, SnailCache.CacheType cacheType, CacheCallBack callback) {
+    public SnailThreadPoolTask(String url, SnailCache cache,
+                               SnailCache.CacheType cacheType, CacheCallBack callback) {
         super(url);
-        this.mDiskLruCache = mDiskLruCache;
+        this.mCache = cache;
         this.callback = callback;
         this.mCacheType = cacheType;
     }
@@ -29,38 +32,40 @@ public class SnailThreadPoolTask extends ThreadPoolTask {
         Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
         Object ob;
 
-        synchronized (mDiskLruCache) {
-            ob = mDiskLruCache.get(url, mCacheType);
+        synchronized (mCache) {
+            ob = mCache.get(url, mCacheType);
         }
+
 
         if (ob == null) {
             switch (mCacheType) {
                 case INPUTSTREAM:
-                    ob = FileUtils.getInputStreamFromURL(url);
-
+                    InputStream is = FileUtils.getInputStreamFromURL(url);
                     try {
-                        mDiskLruCache.put(url, ob);
+                        mCache.put(url, is, SnailCache.CacheType.INPUTSTREAM);
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
                     break;
-                case BITMAP:
-                    // TODO
 
+                case BITMAP:
+                    InputStream is1 = FileUtils.getInputStreamFromURL(url);
+                    try {
+                        mCache.put(url, is1, SnailCache.CacheType.BITMAP);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 case STRING:
 
-                    // TODO
-
                     break;
-
                 default:
                     break;
             }
         }
 
         if (callback != null) {
-            callback.onFinish(url, ob);
+            callback.onFinish(url);
         }
     }
 

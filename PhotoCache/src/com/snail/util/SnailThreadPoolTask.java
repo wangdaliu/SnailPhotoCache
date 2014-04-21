@@ -1,10 +1,6 @@
-package com.snail.cache;
+package com.snail.util;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Process;
-import com.snail.util.FileUtils;
-import com.snail.util.SnailCache;
 
 import java.io.IOException;
 import java.io.InputStream;

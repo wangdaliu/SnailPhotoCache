@@ -1,4 +1,4 @@
-package com.snail.cache;
+package com.snail.util;
 
 public abstract class ThreadPoolTask implements Runnable {
 

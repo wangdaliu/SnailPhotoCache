@@ -1,9 +1,7 @@
-package com.snail.cache;
+package com.snail.util;
 
 import android.util.Log;
 import android.widget.ImageView;
-import com.snail.util.SimpleDiskCache;
-import com.snail.util.SnailCache;
 
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;

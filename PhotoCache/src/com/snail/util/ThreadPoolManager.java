@@ -1,8 +1,10 @@
 package com.snail.util;
 
+import android.content.Context;
 import android.util.Log;
 import android.widget.ImageView;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -26,22 +28,37 @@ public class ThreadPoolManager {
     private Thread poolThread;
     private static final int SLEEP_TIME = 200;
 
+    private SnailCache cache;
 
-    public void loadIcon(final ImageView imageView, final String url, final SnailCache cache) {
+    private static ThreadPoolManager poolManager;
+
+    private Context mContext;
+
+    public static synchronized ThreadPoolManager getInstance(Context context) {
+        if (null == poolManager) {
+            poolManager = new ThreadPoolManager(ThreadPoolManager.TYPE_LIFO, 5, context);
+        }
+        return poolManager;
+    }
+
+    public void loadIcon(final ImageView imageView, final String url) {
         addAsyncTask(new SnailThreadPoolTask(url, cache, SnailCache.CacheType.BITMAP, new CacheCallBack() {
             @Override
             public void onFinish(String key) {
                 imageView.post(new Runnable() {
                     @Override
                     public void run() {
-                        imageView.setImageBitmap(((SimpleDiskCache.BitmapEntry) cache.get(url, SnailCache.CacheType.BITMAP)).getBitmap());
+                        SimpleDiskCache.BitmapEntry bitmapEntry = (SimpleDiskCache.BitmapEntry) cache.get(url, SnailCache.CacheType.BITMAP);
+                        if (null != bitmapEntry) {
+                            imageView.setImageBitmap(bitmapEntry.getBitmap());
+                        }
                     }
                 });
             }
         }));
     }
 
-    public ThreadPoolManager(int type, int poolSize) {
+    private ThreadPoolManager(int type, int poolSize, Context context) {
         this.type = (type == TYPE_FIFO) ? TYPE_FIFO : TYPE_LIFO;
 
         if (poolSize < MIN_POOL_SIZE) poolSize = MIN_POOL_SIZE;
@@ -51,6 +68,13 @@ public class ThreadPoolManager {
         threadPool = Executors.newFixedThreadPool(this.poolSize);
 
         asyncTasks = new LinkedList<ThreadPoolTask>();
+
+        try {
+            cache = new SnailCache(context.getCacheDir(), 1, 10 * 1024 * 1024);
+            poolManager.start();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public void addAsyncTask(ThreadPoolTask task) {

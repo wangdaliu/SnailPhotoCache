@@ -1,6 +1,7 @@
 package com.snail.util;
 
 import android.os.Process;
+import android.text.TextUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,6 +29,10 @@ public class SnailThreadPoolTask extends ThreadPoolTask {
         Process.setThreadPriority(Process.THREAD_PRIORITY_LOWEST);
         Object ob;
 
+        if (TextUtils.isEmpty(url)) {
+            return;
+        }
+
         synchronized (mCache) {
             ob = mCache.get(url, mCacheType);
         }
@@ -38,7 +43,9 @@ public class SnailThreadPoolTask extends ThreadPoolTask {
                 case INPUTSTREAM:
                     InputStream is = FileUtils.getInputStreamFromURL(url);
                     try {
-                        mCache.put(url, is, SnailCache.CacheType.INPUTSTREAM);
+                        if (null != is) {
+                            mCache.put(url, is, SnailCache.CacheType.INPUTSTREAM);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -47,7 +54,9 @@ public class SnailThreadPoolTask extends ThreadPoolTask {
                 case BITMAP:
                     InputStream is1 = FileUtils.getInputStreamFromURL(url);
                     try {
-                        mCache.put(url, is1, SnailCache.CacheType.BITMAP);
+                        if (null != is1) {
+                            mCache.put(url, is1, SnailCache.CacheType.BITMAP);
+                        }
                     } catch (IOException e) {
                         e.printStackTrace();
                     }

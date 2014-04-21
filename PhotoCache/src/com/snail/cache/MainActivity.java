@@ -21,7 +21,7 @@ public class MainActivity extends Activity {
     private static final String URL1 = "http://d.hiphotos.baidu.com/image/w%3D2048/sign=b0f07f7141a98226b8c12c27bebab801/03087bf40ad162d9a9e79f1813dfa9ec8a13cdad.jpg";
     private static final String URL2 = "http://f.hiphotos.baidu.com/image/w%3D2048/sign=3dbacaa22cf5e0feee188e01685835a8/c8177f3e6709c93dbd6acb4c9e3df8dcd00054f5.jpg";
     private static final String URL3 = "http://b.hiphotos.baidu.com/image/w%3D2048/sign=a832eef4b4fd5266a72b3b149f20962b/8326cffc1e178a8290f89dbff403738da877e8ed.jpg";
-    private static final String URL4= "http://b.hiphotos.baidu.com/image/w%3D2048/sign=89638712249759ee4a5067cb86c34216/5ab5c9ea15ce36d354a0602f38f33a87e950b10d.jpg";
+    private static final String URL4 = "http://b.hiphotos.baidu.com/image/w%3D2048/sign=89638712249759ee4a5067cb86c34216/5ab5c9ea15ce36d354a0602f38f33a87e950b10d.jpg";
     private static final String URL5 = "http://b.hiphotos.baidu.com/image/w%3D2048/sign=e0ca1fbad343ad4ba62e41c0b63a5baf/4bed2e738bd4b31cbef876a485d6277f9f2ff8ed.jpg";
     private static final String URL6 = "http://c.hiphotos.baidu.com/image/w%3D2048/sign=ca01c40d249759ee4a5067cb86c34216/5ab5c9ea15ce36d317c2233038f33a87e850b1e8.jpg";
     private static final String URL7 = "http://a.hiphotos.baidu.com/image/w%3D2048/sign=48d9e73e0ef3d7ca0cf63876c627bf09/b3119313b07eca80b5c399e7932397dda04483e8.jpg";
@@ -40,7 +40,6 @@ public class MainActivity extends Activity {
     private static final String URL20 = "http://g.hiphotos.baidu.com/image/w%3D2048/sign=eacef1511f950a7b753549c43ee963d9/f31fbe096b63f624cda693648544ebf81b4ca3da.jpg";
 
 
-    private ThreadPoolManager poolManager;
     private SnailCache cache = null;
     private ListView listView;
     private MyAdapter mAdapter;
@@ -74,16 +73,6 @@ public class MainActivity extends Activity {
 
         mAdapter = new MyAdapter(list, this);
         listView.setAdapter(mAdapter);
-
-
-        poolManager = new ThreadPoolManager(ThreadPoolManager.TYPE_LIFO, 5);
-
-        try {
-            cache = new SnailCache(getCacheDir(), 1, 10 * 1024 * 1024);
-            poolManager.start();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
 
 
@@ -123,7 +112,7 @@ public class MainActivity extends Activity {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            poolManager.loadIcon(holder.icon, urlList.get(position), cache);
+            ThreadPoolManager.getInstance(MainActivity.this).loadIcon(holder.icon, urlList.get(position), cache);
 
             return convertView;
         }

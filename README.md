@@ -5,3 +5,5 @@ SnailPhotoCache
 
 参考 https://github.com/fhucho/simple-disk-cache 
      https://github.com/JakeWharton/DiskLruCache
+
+先从LruCache中读取，获取不成功，则从DiskLruCache中获取

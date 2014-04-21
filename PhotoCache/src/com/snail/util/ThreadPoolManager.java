@@ -71,7 +71,7 @@ public class ThreadPoolManager {
 
         try {
             cache = new SnailCache(context.getCacheDir(), 1, 10 * 1024 * 1024);
-            poolManager.start();
+            start();
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -112,7 +112,7 @@ public class MainActivity extends Activity {
                 holder = (ViewHolder) convertView.getTag();
             }
 
-            ThreadPoolManager.getInstance(MainActivity.this).loadIcon(holder.icon, urlList.get(position), cache);
+            ThreadPoolManager.getInstance(MainActivity.this).loadIcon(holder.icon, urlList.get(position));
 
             return convertView;
         }
